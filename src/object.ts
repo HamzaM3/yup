@@ -122,6 +122,9 @@ export default class ObjectSchema<
     //should ignore nulls here
     if (value === undefined) return this.getDefault();
 
+    // Not necessarily but I mean clone the object
+    let originalParent = JSON.parse(JSON.stringify(_value ? _value : value));
+
     if (!this._typeCheck(value)) return value;
 
     let fields = this.fields;
@@ -155,6 +158,7 @@ export default class ObjectSchema<
           value: inputValue,
           context: options.context,
           parent: intermediateValue,
+          originalParent
         });
 
         let fieldSpec = 'spec' in field ? field.spec : undefined;
