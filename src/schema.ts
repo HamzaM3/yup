@@ -129,6 +129,14 @@ export interface SchemaDescription {
   tests: Array<{ name?: string; params: ExtraParams | undefined }>;
 }
 
+export type DefaultFunctionArgument = {
+  originalParent: object,
+  originalValue: any,
+  originalPath: string,
+  intermediateParent: any,
+  newPath: string,
+}
+
 export default abstract class Schema<
   TType = any,
   TContext = AnyObject,
@@ -613,7 +621,7 @@ export default abstract class Schema<
     }
   }
 
-  protected _getDefault() {
+  protected _getDefault(defaultArgs: DefaultFunctionArgument) {
     let defaultValue = this.spec.default;
 
     if (defaultValue == null) {
@@ -621,7 +629,7 @@ export default abstract class Schema<
     }
 
     return typeof defaultValue === 'function'
-      ? defaultValue.call(this)
+      ? defaultValue.call(this, defaultArgs)
       : cloneDeep(defaultValue);
   }
 
@@ -630,7 +638,7 @@ export default abstract class Schema<
     // If schema is defaulted we know it's at least not undefined
   ): TDefault {
     let schema = this.resolve(options || {});
-    return schema._getDefault();
+    return schema._getDefault(options?.defaultArgs);
   }
 
   default(def: Thunk<any>): any {
